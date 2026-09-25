@@ -1,9 +1,9 @@
 Path : /api/v1/incidents/ai-diagnosis
 Expected Input JSON Response
 {
-  "tenant_id": "A",
-  "incident_id": "123",
-  "adapter": spark",
+  "tenant_id": "string",
+  "incident_id": "string",
+  "adapter": string",
   "pipeline": "string",
   "status": "string",
   "failed_stage": "string",
