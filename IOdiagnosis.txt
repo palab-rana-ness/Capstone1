@@ -22,13 +22,7 @@ Expected Input JSON Response
 
 Expected Output Response
 	
-Successful Response
 
-Media type
-
-application/json
-Controls Accept header.
-Example Value
 Schema
 {
   "tenant_id": "string",
