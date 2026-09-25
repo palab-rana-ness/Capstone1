@@ -1,0 +1,64 @@
+Path : /api/v1/incidents/ai-diagnosis
+Expected Input JSON Response
+{
+  "tenant_id": "A",
+  "incident_id": "123",
+  "adapter": spark",
+  "pipeline": "string",
+  "status": "string",
+  "failed_stage": "string",
+  "failed_task": "string",
+  "error_message": "string",
+  "logs": [
+    "string"
+  ],
+  "details": {
+    "additionalProp1": {}
+  },
+  "metadata": {
+    "additionalProp1": {}
+  }
+}
+
+Expected Output Response
+	
+Successful Response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "tenant_id": "string",
+  "incident_id": "string",
+  "adapter": "string",
+  "pipeline": "string",
+  "failure_location": "string",
+  "root_cause": "string",
+  "confidence": 1,
+  "evidence": [
+    "string"
+  ],
+  "similar_incidents": [
+    {
+      "incident_id": "string",
+      "similarity": 1,
+      "root_cause": "string",
+      "resolution": "string",
+      "adapter": "string",
+      "pipeline": "string"
+    }
+  ],
+  "remedies": [
+    {
+      "action": "string",
+      "explanation": "string",
+      "priority": "medium",
+      "risk": "string",
+      "requires_approval": true
+    }
+  ],
+  "message_for_ui": "string"
+}
