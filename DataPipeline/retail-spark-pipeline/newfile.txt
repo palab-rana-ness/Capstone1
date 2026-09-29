@@ -1,0 +1,1 @@
+newrelic-admin generate-config dac1c162e79d0c41342d404b244292e78595NRAL newrelic.ini

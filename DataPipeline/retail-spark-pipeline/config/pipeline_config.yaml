@@ -1,0 +1,56 @@
+# Non-secret, non-environment-specific pipeline defaults.
+# Values here can be overridden by environment variables (.env) at runtime.
+
+datasets:
+  primary:
+    - products
+    - sales
+    - inventory
+    - promotions
+    - suppliers
+  supporting:
+    - customers
+    - stores
+    - categories
+
+# Maps each dataset to its FastAPI source endpoint and source_system label.
+source_endpoints:
+  products:
+    path: /api/v1/products
+    source_system: product_api
+  sales:
+    # Uses the bulk transactions endpoint (order + nested items in one paginated
+    # call) instead of per-order /sales/orders/{id}/items requests -- Silver
+    # splits the nested "items" array into separate sales / sales_items tables.
+    path: /api/v1/sales/transactions
+    source_system: sales_database
+  inventory:
+    path: /api/v1/inventory
+    source_system: inventory_api
+  promotions:
+    path: /api/v1/promotions
+    source_system: promotion_api
+  suppliers:
+    path: /api/v1/suppliers
+    source_system: supplier_api
+  customers:
+    path: /api/v1/customers
+    source_system: sales_database
+  stores:
+    path: /api/v1/stores
+    source_system: sales_database
+  categories:
+    path: /api/v1/categories
+    source_system: product_database
+
+tenants:
+  - tenant_001
+  - tenant_002
+  - tenant_003
+
+s3_prefixes:
+  bronze: bronze
+  silver: silver
+  gold: gold
+  quarantine: quarantine
+  logs: logs
