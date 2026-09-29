@@ -1,0 +1,288 @@
+openapi: 3.0.3
+info:
+  title: Autonomous Pipeline Incident API
+  description: Backend API consumed by the Reflex frontend (Reflex -> FastAPI -> PostgreSQL / New Relic / LangGraph / Platform Adapter).
+  version: "1.0.0"
+servers:
+  - url: "{FASTAPI_BASE_URL}"
+    variables:
+      FASTAPI_BASE_URL:
+        default: http://localhost:8000
+tags:
+  - name: Incidents
+  - name: Logs
+  - name: Agent
+  - name: Remediation
+  - name: Execution
+  - name: Audit
+  - name: Tenant
+  - name: Platform
+paths:
+  /api/v1/incidents:
+    get:
+      tags: [Incidents]
+      summary: List incidents (dashboard list)
+      parameters:
+        - name: tenant_id
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: severity
+          in: query
+          schema: { type: string }
+        - name: platform
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200": { description: OK }
+    post:
+      tags: [Incidents]
+      summary: Register a new incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_id: { type: string, example: TENANT-A }
+                pipeline: { type: string, example: Orders Pipeline }
+                platform: { type: string, example: SYNAPSE }
+                severity: { type: string, enum: [CRITICAL, HIGH, MEDIUM, LOW] }
+                problem: { type: string, example: Pipeline execution failed }
+                source: { type: string, example: NEW_RELIC }
+      responses:
+        "201": { description: Created }
+
+  /api/v1/incidents/{incident_id}:
+    get:
+      tags: [Incidents]
+      summary: Authoritative incident details + workflow status
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/logs:
+    get:
+      tags: [Logs]
+      summary: Get incident logs
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/logs/refresh:
+    post:
+      tags: [Logs]
+      summary: Refresh logs from New Relic
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+        "202": { description: Accepted/asynchronous }
+
+  /api/v1/incidents/{incident_id}/analyze:
+    post:
+      tags: [Agent]
+      summary: Send incident to agent for analysis
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requested_by: { type: string, example: user-123 }
+                reason: { type: string, example: Please investigate this failure }
+      responses:
+        "200": { description: OK }
+        "202": { description: Accepted/asynchronous }
+
+  /api/v1/incidents/{incident_id}/diagnosis:
+    get:
+      tags: [Agent]
+      summary: Get diagnosis (root cause, confidence, evidence, severity)
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/history:
+    get:
+      tags: [Agent]
+      summary: Get similar historical incidents
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/remediation:
+    get:
+      tags: [Remediation]
+      summary: Get recommended remediation action
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/approve:
+    post:
+      tags: [Remediation]
+      summary: Approve remediation
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approved_by: { type: string, example: user-123 }
+                comment: { type: string, example: Approved after reviewing logs }
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/reject:
+    post:
+      tags: [Remediation]
+      summary: Reject remediation
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rejected_by: { type: string, example: user-123 }
+                comment: { type: string, example: Need further investigation }
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/retry:
+    post:
+      tags: [Remediation]
+      summary: Retry remediation action
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requested_by: { type: string, example: user-123 }
+                reason: { type: string, example: Approved retry }
+      responses:
+        "200": { description: OK }
+        "409": { description: State/action conflict }
+
+  /api/v1/incidents/{incident_id}/execution:
+    get:
+      tags: [Execution]
+      summary: Get execution status
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/validation:
+    get:
+      tags: [Execution]
+      summary: Get validation status
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+
+  /api/v1/incidents/{incident_id}/timeline:
+    get:
+      tags: [Audit]
+      summary: Get audit timeline
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200": { description: OK }
+
+  /api/v1/tenants:
+    get:
+      tags: [Tenant]
+      summary: List tenants
+      responses:
+        "200": { description: OK }
+
+  /api/v1/tenants/{tenant_id}/incidents:
+    get:
+      tags: [Tenant]
+      summary: List incidents for a tenant
+      parameters:
+        - name: tenant_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+
+  /api/v1/tenants/{tenant_id}/config:
+    get:
+      tags: [Tenant]
+      summary: Get tenant configuration
+      parameters:
+        - name: tenant_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+    put:
+      tags: [Tenant]
+      summary: Update tenant configuration
+      parameters:
+        - name: tenant_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+
+  /api/v1/platforms:
+    get:
+      tags: [Platform]
+      summary: List platforms
+      responses:
+        "200": { description: OK }
+
+  /api/v1/platforms/{platform}/config:
+    get:
+      tags: [Platform]
+      summary: Get platform configuration
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+
+components:
+  parameters:
+    IncidentId:
+      name: incident_id
+      in: path
+      required: true
+      schema: { type: string }
+      example: INC-001

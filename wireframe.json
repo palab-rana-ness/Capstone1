@@ -1,0 +1,404 @@
+{
+  "version": 4,
+  "app_title": "Autonomous Incident Management Foundation",
+  "nav": {
+    "placement": "none",
+    "items": []
+  },
+  "pages": [
+    {
+      "id": "page-b35ca350",
+      "name": "Dashboard",
+      "route": "/",
+      "item_ref": {
+        "index": 0,
+        "text": "Build and harden the shared responsive operations shell and data-driven Dashboard with the graphite-and-amber control-room system, tenant/platform selectors, seven incident metrics, recent incidents, pipeline-health bars, page-load and refresh triggers, protected duplicate refreshes, organized operation-specific Reflex state, and a configurable FastAPI service boundary with explicit mock fallback; render only backend responses and cover loading, success, empty, API error, timeout, unauthorized, backend-unavailable, retry, and tenant/platform-switch states."
+      },
+      "blocks": [
+        {
+          "id": "dashboard-nav",
+          "type": "nav",
+          "label": "Application header and navigation",
+          "hint": "Autonomous Incident Management title, Dashboard/Incidents/Configuration links, tenant selector, platform selector",
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 1,
+          "item_ref": {
+            "index": 0,
+            "text": "Build and harden the shared responsive operations shell and data-driven Dashboard with the graphite-and-amber control-room system, tenant/platform selectors, seven incident metrics, recent incidents, pipeline-health bars, page-load and refresh triggers, protected duplicate refreshes, organized operation-specific Reflex state, and a configurable FastAPI service boundary with explicit mock fallback; render only backend responses and cover loading, success, empty, API error, timeout, unauthorized, backend-unavailable, retry, and tenant/platform-switch states."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "dashboard-metrics",
+          "type": "text",
+          "label": "Incident status summary",
+          "hint": "Total, open, investigating, awaiting approval, remediating, resolved, escalated",
+          "x": 0,
+          "y": 1,
+          "w": 12,
+          "h": 2,
+          "item_ref": {
+            "index": 0,
+            "text": "Build and harden the shared responsive operations shell and data-driven Dashboard with the graphite-and-amber control-room system, tenant/platform selectors, seven incident metrics, recent incidents, pipeline-health bars, page-load and refresh triggers, protected duplicate refreshes, organized operation-specific Reflex state, and a configurable FastAPI service boundary with explicit mock fallback; render only backend responses and cover loading, success, empty, API error, timeout, unauthorized, backend-unavailable, retry, and tenant/platform-switch states."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "pipeline-health",
+          "type": "chart_bar",
+          "label": "Pipeline health",
+          "hint": "Visible operational health bars grouped by pipeline state",
+          "x": 0,
+          "y": 3,
+          "w": 5,
+          "h": 3,
+          "item_ref": {
+            "index": 0,
+            "text": "Build and harden the shared responsive operations shell and data-driven Dashboard with the graphite-and-amber control-room system, tenant/platform selectors, seven incident metrics, recent incidents, pipeline-health bars, page-load and refresh triggers, protected duplicate refreshes, organized operation-specific Reflex state, and a configurable FastAPI service boundary with explicit mock fallback; render only backend responses and cover loading, success, empty, API error, timeout, unauthorized, backend-unavailable, retry, and tenant/platform-switch states."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "recent-incidents",
+          "type": "table",
+          "label": "Recent incidents",
+          "hint": "Incident, pipeline, tenant, platform, severity, status, time, action",
+          "x": 5,
+          "y": 3,
+          "w": 7,
+          "h": 3,
+          "item_ref": {
+            "index": 0,
+            "text": "Build and harden the shared responsive operations shell and data-driven Dashboard with the graphite-and-amber control-room system, tenant/platform selectors, seven incident metrics, recent incidents, pipeline-health bars, page-load and refresh triggers, protected duplicate refreshes, organized operation-specific Reflex state, and a configurable FastAPI service boundary with explicit mock fallback; render only backend responses and cover loading, success, empty, API error, timeout, unauthorized, backend-unavailable, retry, and tenant/platform-switch states."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "dashboard-service-states",
+          "type": "text",
+          "label": "Service state feedback",
+          "hint": "Loading, empty, API error, timeout, unauthorized, and backend unavailable presentations",
+          "x": 0,
+          "y": 6,
+          "w": 12,
+          "h": 2,
+          "item_ref": {
+            "index": 0,
+            "text": "Build and harden the shared responsive operations shell and data-driven Dashboard with the graphite-and-amber control-room system, tenant/platform selectors, seven incident metrics, recent incidents, pipeline-health bars, page-load and refresh triggers, protected duplicate refreshes, organized operation-specific Reflex state, and a configurable FastAPI service boundary with explicit mock fallback; render only backend responses and cover loading, success, empty, API error, timeout, unauthorized, backend-unavailable, retry, and tenant/platform-switch states."
+          },
+          "type_source": "palette"
+        }
+      ],
+      "deleted_ids": []
+    },
+    {
+      "id": "page-1ffc6aa6",
+      "name": "Incidents",
+      "route": "/incidents",
+      "item_ref": {
+        "index": 1,
+        "text": "Build and harden the Incidents route with backend-scoped tenant/platform reloads, frontend search/filter/sort only over authorized results, refresh/retry and new-detection handling, reusable badges for the full backend status model, required responsive columns, incident selection and detail navigation, immediate duplicate-request protection, stale-state cleanup, and useful loaded, empty, timeout, unauthorized, backend-unavailable, and general-error presentations."
+      },
+      "blocks": [
+        {
+          "id": "incidents-nav",
+          "type": "nav",
+          "label": "Application header and navigation",
+          "hint": "Shared navigation, tenant selector, platform selector, and refresh action",
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 1,
+          "item_ref": {
+            "index": 1,
+            "text": "Build and harden the Incidents route with backend-scoped tenant/platform reloads, frontend search/filter/sort only over authorized results, refresh/retry and new-detection handling, reusable badges for the full backend status model, required responsive columns, incident selection and detail navigation, immediate duplicate-request protection, stale-state cleanup, and useful loaded, empty, timeout, unauthorized, backend-unavailable, and general-error presentations."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "incident-controls",
+          "type": "text",
+          "label": "Incident context and controls",
+          "hint": "Selected tenant/platform context, refresh control, and operational status summary",
+          "x": 0,
+          "y": 1,
+          "w": 12,
+          "h": 1,
+          "item_ref": {
+            "index": 1,
+            "text": "Build and harden the Incidents route with backend-scoped tenant/platform reloads, frontend search/filter/sort only over authorized results, refresh/retry and new-detection handling, reusable badges for the full backend status model, required responsive columns, incident selection and detail navigation, immediate duplicate-request protection, stale-state cleanup, and useful loaded, empty, timeout, unauthorized, backend-unavailable, and general-error presentations."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "incident-table",
+          "type": "table",
+          "label": "Incident list",
+          "hint": "Responsive incident table with severity/status badges and incident selection actions",
+          "x": 0,
+          "y": 2,
+          "w": 12,
+          "h": 4,
+          "item_ref": {
+            "index": 1,
+            "text": "Build and harden the Incidents route with backend-scoped tenant/platform reloads, frontend search/filter/sort only over authorized results, refresh/retry and new-detection handling, reusable badges for the full backend status model, required responsive columns, incident selection and detail navigation, immediate duplicate-request protection, stale-state cleanup, and useful loaded, empty, timeout, unauthorized, backend-unavailable, and general-error presentations."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "incident-service-states",
+          "type": "list",
+          "label": "Incident list service states",
+          "hint": "Loading, loaded, empty, timeout, unauthorized, unavailable, and general-error states",
+          "x": 0,
+          "y": 6,
+          "w": 12,
+          "h": 2,
+          "item_ref": {
+            "index": 1,
+            "text": "Build and harden the Incidents route with backend-scoped tenant/platform reloads, frontend search/filter/sort only over authorized results, refresh/retry and new-detection handling, reusable badges for the full backend status model, required responsive columns, incident selection and detail navigation, immediate duplicate-request protection, stale-state cleanup, and useful loaded, empty, timeout, unauthorized, backend-unavailable, and general-error presentations."
+          },
+          "type_source": "palette"
+        }
+      ],
+      "deleted_ids": []
+    },
+    {
+      "id": "page-d8b0e2a6",
+      "name": "Incident Details",
+      "route": "/incidents/[incident_id]",
+      "item_ref": {
+        "index": 2,
+        "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+      },
+      "blocks": [
+        {
+          "id": "configuration-nav",
+          "type": "nav",
+          "label": "Application header and navigation",
+          "hint": "Shared navigation, tenant selector, and platform selector",
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 1,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "incident-summary",
+          "type": "text",
+          "label": "Incident information",
+          "hint": "Incident ID, tenant, pipeline, platform, failure time, current status, and severity",
+          "x": 0,
+          "y": 1,
+          "w": 12,
+          "h": 2,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "evidence-panel",
+          "type": "list",
+          "label": "Evidence and logs",
+          "hint": "Pipeline status, recent executions and failures, metrics, and a scrollable backend log area",
+          "x": 0,
+          "y": 3,
+          "w": 7,
+          "h": 4,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "diagnosis-panel",
+          "type": "text",
+          "label": "AI diagnosis and RCA",
+          "hint": "Diagnosing and diagnosis-complete transition, probable root cause, confidence, evidence, and severity",
+          "x": 7,
+          "y": 3,
+          "w": 5,
+          "h": 4,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "history-list",
+          "type": "list",
+          "label": "Similar historical incidents",
+          "hint": "Searching-history progress, returned incident ID, similarity reasons, previous action, and result",
+          "x": 0,
+          "y": 7,
+          "w": 7,
+          "h": 3,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "timeline-preview",
+          "type": "timeline",
+          "label": "Incident timeline preview",
+          "hint": "Major backend-supplied incident events in chronological order",
+          "x": 7,
+          "y": 7,
+          "w": 5,
+          "h": 3,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "remediation-panel",
+          "type": "text",
+          "label": "Recommended remediation",
+          "hint": "Backend-returned RETRY PIPELINE action, reason, risk, execution policy, and authoritative availability state",
+          "x": 0,
+          "y": 10,
+          "w": 5,
+          "h": 3,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "approval-actions",
+          "type": "form",
+          "label": "Approval and execution controls",
+          "hint": "Request Approval, Approve & Execute, Reject, or Execute Retry only as allowed by backend state; confirmation and immediate disabled progress state",
+          "x": 5,
+          "y": 10,
+          "w": 7,
+          "h": 3,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "details-service-states",
+          "type": "text",
+          "label": "Section service states",
+          "hint": "Independent loading, available, empty, error, timeout, and backend-unavailable feedback for each section",
+          "x": 0,
+          "y": 13,
+          "w": 12,
+          "h": 2,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "execution-panel",
+          "type": "list",
+          "label": "Execution status and logs",
+          "hint": "Action, executing state, start time, backend-confirmed success or failure, refresh, and expandable execution logs",
+          "x": 0,
+          "y": 15,
+          "w": 7,
+          "h": 3,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "validation-panel",
+          "type": "text",
+          "label": "Validation and resolution",
+          "hint": "Pipeline status, recovery confirmation, backend-supported Mark Resolved action, or escalation next step",
+          "x": 7,
+          "y": 15,
+          "w": 5,
+          "h": 3,
+          "item_ref": {
+            "index": 2,
+            "text": "Build and harden the platform-agnostic Incident Details route with incident facts, evidence/logs, backend-authoritative diagnosis and history progress, a persistent backend-supplied audit timeline, and the complete remediation flow: recommendation and policy state, request/approve/reject/execute actions only when exposed by the backend, confirmation UX, immediate per-action locking, execution status/logs, validation before resolution or escalation, retryable section failures, and no frontend policy, status-transition, RCA, similarity, execution, audit-generation, or tenant-authorization logic."
+          },
+          "type_source": "palette"
+        }
+      ],
+      "deleted_ids": []
+    },
+    {
+      "id": "page-11d4afa8",
+      "name": "Configuration",
+      "route": "/configuration",
+      "item_ref": {
+        "index": 3,
+        "text": "Build and harden the complete Configuration route with backend-loaded tenant ID, generic Synapse/TIBCO selection, monitoring rules, remediation policy, allowed actions, local form edits, operation-specific switching and saving flags, duplicate-save prevention, definitive success/error handling, and authorized tenant/platform reloads; complete a codebase safety review for direct component API calls, duplicate requests, scattered platform branches, hard-coded tenant access, premature success UI, stale/conflicting state, missing empty/error states, and frontend secrets."
+      },
+      "blocks": [
+        {
+          "id": "blk-668baba1",
+          "type": "nav",
+          "label": "Application header and navigation",
+          "hint": "Shared navigation, tenant selector, and platform selector",
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 1,
+          "item_ref": {
+            "index": 3,
+            "text": "Build and harden the complete Configuration route with backend-loaded tenant ID, generic Synapse/TIBCO selection, monitoring rules, remediation policy, allowed actions, local form edits, operation-specific switching and saving flags, duplicate-save prevention, definitive success/error handling, and authorized tenant/platform reloads; complete a codebase safety review for direct component API calls, duplicate requests, scattered platform branches, hard-coded tenant access, premature success UI, stale/conflicting state, missing empty/error states, and frontend secrets."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "configuration-form",
+          "type": "form",
+          "label": "Tenant and platform configuration",
+          "hint": "Tenant ID, platform type, monitoring rules, remediation policy, and allowed-action control surfaces",
+          "x": 0,
+          "y": 1,
+          "w": 8,
+          "h": 4,
+          "item_ref": {
+            "index": 3,
+            "text": "Build and harden the complete Configuration route with backend-loaded tenant ID, generic Synapse/TIBCO selection, monitoring rules, remediation policy, allowed actions, local form edits, operation-specific switching and saving flags, duplicate-save prevention, definitive success/error handling, and authorized tenant/platform reloads; complete a codebase safety review for direct component API calls, duplicate requests, scattered platform branches, hard-coded tenant access, premature success UI, stale/conflicting state, missing empty/error states, and frontend secrets."
+          },
+          "type_source": "palette"
+        },
+        {
+          "id": "configuration-context",
+          "type": "text",
+          "label": "Configuration context",
+          "hint": "Backend-authoritative notice, integration boundary details, and service-state feedback",
+          "x": 8,
+          "y": 1,
+          "w": 4,
+          "h": 4,
+          "item_ref": {
+            "index": 3,
+            "text": "Build and harden the complete Configuration route with backend-loaded tenant ID, generic Synapse/TIBCO selection, monitoring rules, remediation policy, allowed actions, local form edits, operation-specific switching and saving flags, duplicate-save prevention, definitive success/error handling, and authorized tenant/platform reloads; complete a codebase safety review for direct component API calls, duplicate requests, scattered platform branches, hard-coded tenant access, premature success UI, stale/conflicting state, missing empty/error states, and frontend secrets."
+          },
+          "type_source": "palette"
+        }
+      ],
+      "deleted_ids": []
+    }
+  ],
+  "attached_to_plan": false
+}
