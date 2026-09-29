@@ -33,11 +33,13 @@ class ScopeState(rx.State):
 
         from autonomous_pipeline_incident_ui.states.detail_state import DetailState
         from autonomous_pipeline_incident_ui.states.config_state import ConfigState
+        from autonomous_pipeline_incident_ui.states.pipeline_state import PipelineRunState
 
         dashboard = await self.get_state(DashboardState)
         incidents = await self.get_state(IncidentState)
         details = await self.get_state(DetailState)
         config = await self.get_state(ConfigState)
+        pipeline = await self.get_state(PipelineRunState)
         options = self.tenants if dimension == "tenant" else self.platforms
         current = self.tenant_id if dimension == "tenant" else self.platform_id
         if (
@@ -45,6 +47,7 @@ class ScopeState(rx.State):
             or incidents.busy
             or details.busy
             or config.busy
+            or pipeline.busy
             or value == current
             or value not in {item.id for item in options}
         ):
@@ -58,6 +61,7 @@ class ScopeState(rx.State):
         details._invalidate()
         dashboard._begin("invalidate")
         config._invalidate()
+        pipeline._invalidate()
         path = self.router.url.path.rstrip("/")
         if path == "/configuration":
             config._begin()

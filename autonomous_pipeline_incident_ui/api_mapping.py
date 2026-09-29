@@ -29,6 +29,9 @@ from autonomous_pipeline_incident_ui.models import (
     ConfigurationResponse,
     ConfigurationSavedResponse,
     PlatformConfiguration,
+    PipelineRunStartResponse,
+    PipelineRunResultResponse,
+    PipelineDiagnosisResponse,
 )
 
 
@@ -544,6 +547,165 @@ def display_value(value: object) -> str:
         value
         if isinstance(value, str)
         else json.dumps(value, ensure_ascii=False, allow_nan=False)
+    )
+
+
+def _first_text(*values: object) -> str:
+    for value in values:
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def _pipeline_outcome(value: object) -> str:
+    if not isinstance(value, str):
+        return ""
+    normalized = value.strip().upper()
+    if normalized in {"PASSED", "PASS", "SUCCESS", "SUCCEEDED"}:
+        return "PASSED"
+    if normalized in {"FAILED", "FAIL", "ERROR"}:
+        return "FAILED"
+    return ""
+
+
+def normalize_pipeline_run_start(
+    data: object,
+    tenant: str,
+    platform: str,
+    pipeline_type: str,
+) -> PipelineRunStartResponse:
+    body = unwrap(data, ("data", "run", "result"), tenant, platform)
+    if isinstance(body, str):
+        body = {"run_id": body}
+    if not isinstance(body, dict):
+        raise ServiceError("api")
+    check_scope(body, tenant, platform)
+    meta = data.get("meta", {}) if isinstance(data, dict) else {}
+    if not isinstance(meta, dict):
+        meta = {}
+    run_id = _first_text(
+        body.get("run_id"),
+        body.get("pipeline_run_id"),
+        body.get("execution_id"),
+        body.get("request_id"),
+        body.get("incident_id"),
+        meta.get("request_id"),
+    )
+    if not run_id:
+        raise ServiceError("api")
+    accepted = body.get("accepted", True)
+    if type(accepted) is not bool:
+        raise ServiceError("api")
+    status = body.get("status", body.get("state", ""))
+    if status and not isinstance(status, str):
+        raise ServiceError("api")
+    return PipelineRunStartResponse(
+        run_id=run_id,
+        status=status,
+        accepted=accepted,
+        tenant_id=_first_text(body.get("tenant_id"), tenant),
+        platform_id=_first_text(body.get("platform_id"), platform),
+        pipeline_type=_first_text(
+            body.get("pipeline_type"),
+            body.get("pipeline"),
+            body.get("pipeline_name"),
+            pipeline_type,
+        ),
+    )
+
+
+def normalize_pipeline_run_result(
+    data: object,
+    tenant: str,
+    platform: str,
+    run_id: str,
+) -> PipelineRunResultResponse:
+    body = unwrap(data, ("data", "result", "run"), tenant, platform)
+    if isinstance(body, str):
+        body = {"outcome": body}
+    if not isinstance(body, dict):
+        raise ServiceError("api")
+    check_scope(body, tenant, platform)
+    response_run_id = _first_text(
+        body.get("run_id"),
+        body.get("pipeline_run_id"),
+        body.get("execution_id"),
+        run_id,
+    )
+    if run_id and response_run_id != run_id:
+        raise ServiceError("api")
+    outcome = _pipeline_outcome(
+        body.get(
+            "outcome",
+            body.get("result", body.get("pipeline_result", body.get("status", ""))),
+        )
+    )
+    if not outcome:
+        raise ServiceError("api")
+    status = body.get("status", "")
+    if status and not isinstance(status, str):
+        raise ServiceError("api")
+    details = body.get(
+        "details",
+        body.get("failure_details", body.get("message", body.get("error", ""))),
+    )
+    return PipelineRunResultResponse(
+        run_id=response_run_id,
+        outcome=outcome,
+        status=status,
+        details=display_value(details) if details else "",
+        tenant_id=_first_text(body.get("tenant_id"), tenant),
+        platform_id=_first_text(body.get("platform_id"), platform),
+        pipeline_type=_first_text(
+            body.get("pipeline_type"), body.get("pipeline"), body.get("pipeline_name")
+        ),
+    )
+
+
+def normalize_pipeline_diagnosis(
+    data: object,
+    tenant: str,
+    platform: str,
+    run_id: str,
+) -> PipelineDiagnosisResponse:
+    body = unwrap(data, ("data", "diagnosis", "result"), tenant, platform)
+    if isinstance(body, str):
+        body = {"diagnosis": body}
+    if not isinstance(body, dict):
+        raise ServiceError("api")
+    check_scope(body, tenant, platform)
+    response_run_id = _first_text(
+        body.get("run_id"),
+        body.get("pipeline_run_id"),
+        body.get("execution_id"),
+        run_id,
+    )
+    if run_id and response_run_id != run_id:
+        raise ServiceError("api")
+    diagnosis = _first_text(
+        body.get("diagnosis"),
+        body.get("root_cause"),
+        body.get("rca"),
+        body.get("summary"),
+        body.get("message"),
+    )
+    if not diagnosis and body.get("result") not in {None, ""}:
+        diagnosis = display_value(body["result"])
+    if not diagnosis:
+        raise ServiceError("api")
+    details = body.get(
+        "details",
+        body.get("evidence", body.get("failure_details", body.get("context", ""))),
+    )
+    return PipelineDiagnosisResponse(
+        run_id=response_run_id,
+        diagnosis=diagnosis,
+        details=display_value(details) if details else "",
+        tenant_id=_first_text(body.get("tenant_id"), tenant),
+        platform_id=_first_text(body.get("platform_id"), platform),
+        pipeline_type=_first_text(
+            body.get("pipeline_type"), body.get("pipeline"), body.get("pipeline_name")
+        ),
     )
 
 

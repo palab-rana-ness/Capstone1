@@ -16,6 +16,9 @@ Supported environment variable names:
 - `REFLEX_ENV_MODE`
 - `OPS_PROVIDER`
 - `OPS_DEMO_SCENARIO`
+- `PIPELINE_RUN_START_PATH`
+- `PIPELINE_RESULT_PATH`
+- `PIPELINE_DIAGNOSE_PATH`
 
 The base URL is validated on each request. Transport redirects are disabled. Optional bearer authorization stays server-side; response bodies and transport exception details are not used as user-facing error messages. The current operator must be configured before analysis can be submitted. No identity is invented by the UI.
 
@@ -42,6 +45,9 @@ The base URL is validated on each request. Transport redirects are disabled. Opt
 | GET, PUT | `/api/v1/tenants/{tenant_id}/config` |
 | GET | `/api/v1/platforms` |
 | GET | `/api/v1/platforms/{platform}/config` |
+| POST | `/api/v1/pipelines/run` (default for pipeline start; override with `PIPELINE_RUN_START_PATH`) |
+| GET | `/api/v1/pipelines/{run_id}/result` (default for pipeline result; override with `PIPELINE_RESULT_PATH`) |
+| POST | `/api/v1/pipelines/{run_id}/diagnose` (default for RCA call; override with `PIPELINE_DIAGNOSE_PATH`) |
 
 Analysis sends exactly `requested_by` and `reason`. Action writes carry an idempotency key; a timeout never triggers an automatic resubmission. Refresh Logs sends one POST. Configuration saves require a definitive saved response and an advanced revision. API mode never uses legacy operation URLs.
 

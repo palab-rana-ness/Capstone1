@@ -12,7 +12,13 @@ from autonomous_pipeline_incident_ui.models import (
     Metric,
     Pipeline,
     ScopeOption,
+    PipelineRunStartResponse,
+    PipelineRunResultResponse,
+    PipelineDiagnosisResponse,
 )
+
+
+_pipeline_runs: dict[str, dict[str, str]] = {}
 
 
 def _detail_capabilities(status: str, approval: bool):
@@ -531,6 +537,127 @@ async def catalog() -> Catalog:
             ScopeOption(id="synapse", label="Synapse"),
             ScopeOption(id="tibco", label="TIBCO"),
         ],
+    )
+
+
+def _pipeline_failure(
+    tenant: str,
+    platform: str,
+    pipeline_type: str,
+) -> tuple[str, str]:
+    scenario = os.getenv("OPS_DEMO_SCENARIO", "loaded")
+    failed = (
+        scenario in {"pipeline_failed", "failed_retry", "validation_failed"}
+        or "fail" in pipeline_type.casefold()
+    )
+    if failed:
+        return (
+            "FAILED",
+            f"{pipeline_type} reported a failed run in {tenant}/{platform}.",
+        )
+    return (
+        "PASSED",
+        f"{pipeline_type} completed successfully for {tenant}/{platform}.",
+    )
+
+
+async def pipeline_run_start(
+    tenant: str,
+    platform: str,
+    pipeline_type: str,
+) -> PipelineRunStartResponse:
+    from autonomous_pipeline_incident_ui.service import ServiceError, _development_provider
+
+    if not _development_provider():
+        raise ServiceError("unavailable")
+    await asyncio.sleep(0.35)
+    if tenant not in {"tenant-a", "tenant-b"} or platform not in {
+        "synapse",
+        "tibco",
+    }:
+        raise ServiceError("unauthorized")
+    scenario = os.getenv("OPS_DEMO_SCENARIO", "loaded")
+    if scenario in {"timeout", "unauthorized", "unavailable", "api"}:
+        raise ServiceError(scenario)
+    run_id = f"demo-{tenant}-{platform}-{abs(hash(pipeline_type)) % 1000000}"
+    outcome, details = _pipeline_failure(tenant, platform, pipeline_type)
+    _pipeline_runs[run_id] = {
+        "tenant_id": tenant,
+        "platform_id": platform,
+        "pipeline_type": pipeline_type,
+        "outcome": outcome,
+        "details": details,
+        "diagnosis": "",
+    }
+    return PipelineRunStartResponse(
+        run_id=run_id,
+        status="QUEUED",
+        accepted=True,
+        tenant_id=tenant,
+        platform_id=platform,
+        pipeline_type=pipeline_type,
+    )
+
+
+async def pipeline_run_result(
+    tenant: str,
+    platform: str,
+    run_id: str,
+) -> PipelineRunResultResponse:
+    from autonomous_pipeline_incident_ui.service import ServiceError, _development_provider
+
+    if not _development_provider():
+        raise ServiceError("unavailable")
+    await asyncio.sleep(0.25)
+    run = _pipeline_runs.get(run_id)
+    if run is None:
+        raise ServiceError("empty")
+    if (run["tenant_id"], run["platform_id"]) != (tenant, platform):
+        raise ServiceError("api")
+    return PipelineRunResultResponse(
+        run_id=run_id,
+        outcome=run["outcome"],
+        status=run["outcome"],
+        details=run["details"],
+        tenant_id=tenant,
+        platform_id=platform,
+        pipeline_type=run["pipeline_type"],
+    )
+
+
+async def pipeline_run_diagnosis(
+    tenant: str,
+    platform: str,
+    run_id: str,
+    pipeline_type: str,
+) -> PipelineDiagnosisResponse:
+    from autonomous_pipeline_incident_ui.service import ServiceError, _development_provider
+
+    if not _development_provider():
+        raise ServiceError("unavailable")
+    await asyncio.sleep(0.3)
+    run = _pipeline_runs.get(run_id)
+    if run is None:
+        raise ServiceError("empty")
+    if (run["tenant_id"], run["platform_id"]) != (tenant, platform):
+        raise ServiceError("api")
+    if run["outcome"] != "FAILED":
+        raise ServiceError("request_invalid")
+    diagnosis = (
+        "Primary RCA: downstream dependency timeout during pipeline execution."
+    )
+    details = (
+        f"Agentic analysis reviewed the failed {pipeline_type} run and correlated "
+        "connection timeout signatures across retries."
+    )
+    run["diagnosis"] = diagnosis
+    return PipelineDiagnosisResponse(
+        run_id=run_id,
+        diagnosis=diagnosis,
+        details=details,
+        tenant_id=tenant,
+        platform_id=platform,
+        pipeline_type=run["pipeline_type"],
     )
 
 

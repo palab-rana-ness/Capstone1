@@ -9,6 +9,7 @@ from autonomous_pipeline_incident_ui.service import (
 )
 from urllib.parse import quote
 from autonomous_pipeline_incident_ui.states.scope_state import ScopeState
+from autonomous_pipeline_incident_ui.states.pipeline_state import PipelineRunState
 
 
 class DashboardState(rx.State):
@@ -173,6 +174,12 @@ class DashboardState(rx.State):
                     self.summary = result.summary
                     self.demo = result.demo
                     self.loaded = True
+                    pipeline_state = await self.get_state(PipelineRunState)
+                    pipeline_state.sync_scope(
+                        result.tenant_id,
+                        result.platform_id,
+                        [row.name for row in result.pipelines],
+                    )
         except Exception as error:
             kind = error.kind if isinstance(error, ServiceError) else "api"
             try:

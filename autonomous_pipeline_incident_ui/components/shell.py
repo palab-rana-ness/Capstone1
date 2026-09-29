@@ -4,6 +4,7 @@ from autonomous_pipeline_incident_ui.states.dashboard_state import DashboardStat
 from autonomous_pipeline_incident_ui.states.incident_state import IncidentState
 from autonomous_pipeline_incident_ui.states.detail_state import DetailState
 from autonomous_pipeline_incident_ui.states.config_state import ConfigState
+from autonomous_pipeline_incident_ui.states.pipeline_state import PipelineRunState
 
 
 def navigation(active: str = "Dashboard") -> rx.Component:
@@ -72,7 +73,8 @@ def scope_controls() -> rx.Component:
                     disabled=DashboardState.busy
                     | IncidentState.busy
                     | DetailState.busy
-                    | ConfigState.busy,
+                    | ConfigState.busy
+                    | PipelineRunState.busy,
                     class_name="w-full appearance-none bg-transparent py-1 pr-6 text-sm text-zinc-200 outline-hidden disabled:cursor-wait [&>option]:bg-zinc-900",
                 ),
                 rx.icon(
@@ -104,7 +106,8 @@ def scope_controls() -> rx.Component:
                     disabled=DashboardState.busy
                     | IncidentState.busy
                     | DetailState.busy
-                    | ConfigState.busy,
+                    | ConfigState.busy
+                    | PipelineRunState.busy,
                     class_name="w-full appearance-none bg-transparent py-1 pr-6 text-sm text-zinc-200 outline-hidden disabled:cursor-wait [&>option]:bg-zinc-900",
                 ),
                 rx.icon(

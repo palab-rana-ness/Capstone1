@@ -3,6 +3,7 @@ import reflex_xy
 from autonomous_pipeline_incident_ui.models import Metric, Incident, Pipeline
 from autonomous_pipeline_incident_ui.states.dashboard_state import DashboardState
 from autonomous_pipeline_incident_ui.states.scope_state import ScopeState
+from autonomous_pipeline_incident_ui.states.pipeline_state import PipelineRunState
 from autonomous_pipeline_incident_ui.components.incident_badges import status_badge, severity_badge
 
 
@@ -126,6 +127,167 @@ def pipeline_panel() -> rx.Component:
             ),
         ),
         class_name="min-w-0 rounded-md border border-white/10 bg-[#191b1e]",
+    )
+
+
+def pipeline_run_panel() -> rx.Component:
+    return rx.el.section(
+        section_heading("04", "Pipeline run", "HUMAN-TRIGGERED"),
+        rx.el.div(
+            rx.el.p(
+                "Tenant",
+                class_name="mb-2 text-[10px] uppercase tracking-wide text-zinc-500",
+            ),
+            rx.el.p(
+                ScopeState.tenant_label,
+                class_name="text-sm text-zinc-200",
+            ),
+            rx.el.p(
+                "Pipeline type",
+                class_name="mb-2 mt-5 text-[10px] uppercase tracking-wide text-zinc-500",
+            ),
+            rx.el.div(
+                rx.el.select(
+                    rx.el.option("Select pipeline type", value="", disabled=True),
+                    rx.foreach(
+                        PipelineRunState.pipeline_types,
+                        lambda value: rx.el.option(value, value=value),
+                    ),
+                    value=PipelineRunState.pipeline_type,
+                    on_change=PipelineRunState.set_pipeline_type,
+                    disabled=PipelineRunState.busy
+                    | (PipelineRunState.pipeline_types.length() == 0),
+                    class_name="w-full appearance-none rounded-md border border-white/10 bg-[#202226] px-3 py-2.5 pr-9 text-xs text-zinc-200 outline-hidden focus:border-amber-400 disabled:opacity-50",
+                ),
+                rx.icon(
+                    "chevron-down",
+                    class_name="pointer-events-none absolute right-3 top-3 h-4 w-4 text-zinc-500",
+                ),
+                class_name="relative",
+            ),
+            rx.el.button(
+                rx.cond(
+                    PipelineRunState.run_loading | PipelineRunState.result_loading,
+                    rx.icon("loader-circle", class_name="h-4 w-4 animate-spin"),
+                    rx.icon("play", class_name="h-4 w-4"),
+                ),
+                rx.cond(
+                    PipelineRunState.run_loading,
+                    "Starting…",
+                    rx.cond(
+                        PipelineRunState.result_loading,
+                        "Getting result…",
+                        "Run Pipeline",
+                    ),
+                ),
+                on_click=PipelineRunState.run_pipeline,
+                disabled=~PipelineRunState.can_run,
+                class_name="mt-5 inline-flex items-center gap-2 rounded-md bg-amber-400 px-4 py-2.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40",
+            ),
+            rx.cond(
+                PipelineRunState.status_text != "",
+                rx.el.p(
+                    PipelineRunState.status_text,
+                    class_name="mt-4 text-xs text-zinc-300",
+                    role="status",
+                ),
+            ),
+            rx.cond(
+                PipelineRunState.error_kind != "",
+                rx.el.div(
+                    rx.icon("triangle-alert", class_name="h-4 w-4 text-amber-300"),
+                    rx.el.p(
+                        PipelineRunState.error_message,
+                        class_name="text-xs leading-5 text-amber-200",
+                    ),
+                    role="alert",
+                    class_name="mt-4 flex items-start gap-2 rounded-md border border-amber-400/30 bg-amber-400/5 p-3",
+                ),
+            ),
+            rx.cond(
+                PipelineRunState.pipeline_outcome == "PASSED",
+                rx.el.div(
+                    rx.icon("circle-check", class_name="h-4 w-4 text-green-300"),
+                    rx.el.span("Pipeline Passed", class_name="text-xs text-green-200"),
+                    class_name="mt-4 flex items-center gap-2 rounded-md border border-green-400/20 bg-green-500/10 px-3 py-2",
+                ),
+            ),
+            rx.cond(
+                PipelineRunState.pipeline_outcome == "FAILED",
+                rx.el.div(
+                    rx.el.div(
+                        rx.icon("circle-x", class_name="h-4 w-4 text-amber-300"),
+                        rx.el.span("Pipeline Failed", class_name="text-xs text-amber-200"),
+                        class_name="flex items-center gap-2",
+                    ),
+                    rx.cond(
+                        PipelineRunState.result_details != "",
+                        rx.el.p(
+                            PipelineRunState.result_details,
+                            class_name="mt-2 text-xs leading-5 text-zinc-300",
+                        ),
+                    ),
+                    rx.cond(
+                        PipelineRunState.show_diagnose,
+                        rx.el.button(
+                            rx.cond(
+                                PipelineRunState.diagnose_loading,
+                                rx.icon(
+                                    "loader-circle",
+                                    class_name="h-4 w-4 animate-spin",
+                                ),
+                                rx.icon("stethoscope", class_name="h-4 w-4"),
+                            ),
+                            rx.cond(
+                                PipelineRunState.diagnose_loading,
+                                "Diagnosing…",
+                                "Diagnose",
+                            ),
+                            on_click=PipelineRunState.diagnose,
+                            disabled=PipelineRunState.busy,
+                            class_name="mt-3 inline-flex items-center gap-2 rounded-md border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-xs text-amber-300 hover:bg-amber-400/10 disabled:opacity-40",
+                        ),
+                    ),
+                    class_name="mt-4 rounded-md border border-amber-400/20 bg-[#202226] p-3",
+                ),
+            ),
+            rx.cond(
+                PipelineRunState.show_fix,
+                rx.el.div(
+                    rx.el.p(
+                        "Diagnosis",
+                        class_name="text-[10px] uppercase tracking-wide text-zinc-500",
+                    ),
+                    rx.el.p(
+                        PipelineRunState.diagnosis,
+                        class_name="mt-2 text-xs leading-5 text-zinc-200",
+                    ),
+                    rx.cond(
+                        PipelineRunState.diagnosis_details != "",
+                        rx.el.p(
+                            PipelineRunState.diagnosis_details,
+                            class_name="mt-2 text-xs leading-5 text-zinc-400",
+                        ),
+                    ),
+                    rx.el.button(
+                        "Fix",
+                        rx.icon("wrench", class_name="h-4 w-4"),
+                        on_click=PipelineRunState.fix_placeholder,
+                        class_name="mt-3 inline-flex items-center gap-2 rounded-md border border-white/15 bg-[#1b1d20] px-3 py-2 text-xs text-zinc-300 hover:text-amber-300",
+                    ),
+                    rx.cond(
+                        PipelineRunState.fix_note != "",
+                        rx.el.p(
+                            PipelineRunState.fix_note,
+                            class_name="mt-2 text-[11px] text-zinc-500",
+                        ),
+                    ),
+                    class_name="mt-4 rounded-md border border-white/10 bg-[#202226] p-3",
+                ),
+            ),
+            class_name="p-5",
+        ),
+        class_name="mt-6 rounded-md border border-white/10 bg-[#191b1e]",
     )
 
 
@@ -437,6 +599,7 @@ def dashboard_content() -> rx.Component:
                         briefing_panel(),
                         class_name="mt-6 grid items-start gap-6 lg:grid-cols-3",
                     ),
+                    pipeline_run_panel(),
                     incidents_panel(),
                 ),
                 loading_panel(),

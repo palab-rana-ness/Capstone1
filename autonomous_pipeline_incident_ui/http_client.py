@@ -150,6 +150,45 @@ def incident_path(identifier: str = "", suffix: str = "") -> str:
     return f"/api/v1/incidents/{segment(identifier)}{suffix}"
 
 
+def _validate_path_template(value: str) -> str:
+    path = value.strip()
+    if (
+        not path
+        or not path.startswith("/")
+        or "?" in path
+        or "#" in path
+        or any(ord(char) < 32 for char in path)
+    ):
+        raise ServiceError("request_invalid")
+    return path.rstrip("/") or "/"
+
+
+def pipeline_path(operation: str, run_id: str = "") -> str:
+    templates = {
+        "start": os.getenv(
+            "PIPELINE_RUN_START_PATH", "/api/v1/pipelines/run"
+        ),
+        "result": os.getenv(
+            "PIPELINE_RESULT_PATH", "/api/v1/pipelines/{run_id}/result"
+        ),
+        "diagnose": os.getenv(
+            "PIPELINE_DIAGNOSE_PATH", "/api/v1/pipelines/{run_id}/diagnose"
+        ),
+    }
+    if operation not in templates:
+        raise ServiceError("request_invalid")
+    template = _validate_path_template(templates[operation])
+    if "{run_id}" in template:
+        if not run_id:
+            raise ServiceError("request_invalid")
+        return template.replace("{run_id}", segment(run_id))
+    if operation == "start":
+        return template
+    if not run_id:
+        raise ServiceError("request_invalid")
+    return f"{template}/{segment(run_id)}"
+
+
 async def json_request(
     path: str,
     params: dict[str, str],
@@ -238,6 +277,27 @@ async def incident_json(
         path = f"/api/v1/tenants/{segment(tenant)}/incidents"
     return await json_request(
         path,
+        {"tenant_id": tenant, "platform_id": platform},
+        method,
+        body,
+        idempotency_key,
+    )
+
+
+async def pipeline_json(
+    operation: str,
+    tenant: str,
+    platform: str,
+    run_id: str = "",
+    method: str = "POST",
+    body: object = None,
+    idempotency_key: str = "",
+) -> object:
+    expected = {"start": "POST", "result": "GET", "diagnose": "POST"}
+    if operation not in expected or method != expected[operation]:
+        raise ServiceError("request_invalid")
+    return await json_request(
+        pipeline_path(operation, run_id),
         {"tenant_id": tenant, "platform_id": platform},
         method,
         body,

@@ -8,6 +8,7 @@ from autonomous_pipeline_incident_ui.http_client import (
     incident_json,
     catalog_json,
     config_json,
+    pipeline_json,
 )
 from autonomous_pipeline_incident_ui.api_mapping import (
     mapped,
@@ -20,6 +21,9 @@ from autonomous_pipeline_incident_ui.api_mapping import (
     normalize_catalog,
     normalize_config,
     normalize_platform_config,
+    normalize_pipeline_run_start,
+    normalize_pipeline_run_result,
+    normalize_pipeline_diagnosis,
 )
 from autonomous_pipeline_incident_ui.models import (
     Catalog,
@@ -32,6 +36,11 @@ from autonomous_pipeline_incident_ui.models import (
     WorkflowResponse,
     DetailSection,
     PlatformConfiguration,
+    PipelineRunRequest,
+    PipelineRunStartResponse,
+    PipelineRunResultResponse,
+    PipelineDiagnosisRequest,
+    PipelineDiagnosisResponse,
 )
 
 
@@ -531,3 +540,164 @@ async def load_dashboard(tenant: str, platform: str) -> DashboardResponse:
     ):
         raise ServiceError("api")
     return result
+
+
+def _validate_pipeline_scope(
+    tenant: str,
+    platform: str,
+    response_tenant: str,
+    response_platform: str,
+):
+    if response_tenant and response_tenant != tenant:
+        raise ServiceError("api")
+    if response_platform and response_platform != platform:
+        raise ServiceError("api")
+
+
+async def start_pipeline_run(
+    tenant: str,
+    platform: str,
+    pipeline_type: str,
+) -> PipelineRunStartResponse:
+    try:
+        request = PipelineRunRequest(
+            tenant_id=tenant,
+            platform_id=platform,
+            pipeline_type=pipeline_type,
+        )
+        if _development_provider():
+            from autonomous_pipeline_incident_ui.mock_provider import (
+                pipeline_run_start,
+            )
+
+            result = await pipeline_run_start(
+                request.tenant_id,
+                request.platform_id,
+                request.pipeline_type,
+            )
+        else:
+            payload = request.model_dump()
+            data = await pipeline_json(
+                "start",
+                tenant,
+                platform,
+                method="POST",
+                body=payload,
+            )
+            result = mapped(
+                normalize_pipeline_run_start,
+                data,
+                tenant,
+                platform,
+                pipeline_type,
+            )
+        _validate_pipeline_scope(
+            tenant,
+            platform,
+            result.tenant_id,
+            result.platform_id,
+        )
+        return result
+    except Exception as error:
+        logging.exception("Unexpected error")
+        kind = error.kind if isinstance(error, ServiceError) else "api"
+        raise ServiceError(kind) from None
+
+
+async def get_pipeline_run_result(
+    tenant: str,
+    platform: str,
+    run_id: str,
+) -> PipelineRunResultResponse:
+    try:
+        if not run_id.strip():
+            raise ServiceError("request_invalid")
+        if _development_provider():
+            from autonomous_pipeline_incident_ui.mock_provider import (
+                pipeline_run_result,
+            )
+
+            result = await pipeline_run_result(tenant, platform, run_id)
+        else:
+            data = await pipeline_json(
+                "result",
+                tenant,
+                platform,
+                run_id=run_id,
+                method="GET",
+            )
+            result = mapped(
+                normalize_pipeline_run_result,
+                data,
+                tenant,
+                platform,
+                run_id,
+            )
+        if result.run_id != run_id:
+            raise ServiceError("api")
+        _validate_pipeline_scope(
+            tenant,
+            platform,
+            result.tenant_id,
+            result.platform_id,
+        )
+        return result
+    except Exception as error:
+        logging.exception("Unexpected error")
+        kind = error.kind if isinstance(error, ServiceError) else "api"
+        raise ServiceError(kind) from None
+
+
+async def diagnose_pipeline_run(
+    tenant: str,
+    platform: str,
+    run_id: str,
+    pipeline_type: str,
+) -> PipelineDiagnosisResponse:
+    try:
+        request = PipelineDiagnosisRequest(
+            run_id=run_id,
+            tenant_id=tenant,
+            platform_id=platform,
+            pipeline_type=pipeline_type,
+        )
+        if _development_provider():
+            from autonomous_pipeline_incident_ui.mock_provider import (
+                pipeline_run_diagnosis,
+            )
+
+            result = await pipeline_run_diagnosis(
+                request.tenant_id,
+                request.platform_id,
+                request.run_id,
+                request.pipeline_type,
+            )
+        else:
+            data = await pipeline_json(
+                "diagnose",
+                tenant,
+                platform,
+                run_id=run_id,
+                method="POST",
+                body=request.model_dump(),
+            )
+            result = mapped(
+                normalize_pipeline_diagnosis,
+                data,
+                tenant,
+                platform,
+                run_id,
+            )
+        if result.run_id != run_id:
+            raise ServiceError("api")
+        _validate_pipeline_scope(
+            tenant,
+            platform,
+            result.tenant_id,
+            result.platform_id,
+        )
+        return result
+    except Exception as error:
+        logging.exception("Unexpected error")
+        kind = error.kind if isinstance(error, ServiceError) else "api"
+        raise ServiceError(kind) from None

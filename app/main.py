@@ -3,11 +3,13 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import text
 
 from app.database.connection import SessionLocal, engine
-from app.routers import incidents
+from app.routers import incidents, tenants, platforms
 from app.seed import init_db, seed_if_empty
 
 app = FastAPI(title="Autonomous Pipeline Incident API")
 app.include_router(incidents.router)
+app.include_router(tenants.router)
+app.include_router(platforms.router)
 
 
 @app.on_event("startup")

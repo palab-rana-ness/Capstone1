@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
 from app.models_db import Base, IncidentDB
@@ -100,6 +101,96 @@ SEED_INCIDENTS = [
 
 def init_db(engine) -> None:
     Base.metadata.create_all(bind=engine)
+    _ensure_incidents_schema_compatibility(engine)
+
+
+def _ensure_incidents_schema_compatibility(engine) -> None:
+    inspector = inspect(engine)
+    if "incidents" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("incidents")}
+    required_columns: dict[str, str] = {
+        "tenant_id": "VARCHAR",
+        "platform_id": "VARCHAR",
+        "pipeline": "VARCHAR",
+        "severity": "VARCHAR",
+        "status": "VARCHAR",
+        "problem": "VARCHAR",
+        "source": "VARCHAR",
+        "created_at": "TIMESTAMP",
+        "updated_at": "TIMESTAMP",
+    }
+    defaults: dict[str, str] = {
+        "tenant_id": "'UNKNOWN_TENANT'",
+        "platform_id": "'UNKNOWN_PLATFORM'",
+        "pipeline": "''",
+        "severity": "'MEDIUM'",
+        "status": "'DETECTED'",
+        "problem": "''",
+        "source": "'NEW_RELIC'",
+        "created_at": "CURRENT_TIMESTAMP",
+        "updated_at": "CURRENT_TIMESTAMP",
+    }
+    legacy_sources: dict[str, str] = {
+        "platform_id": "platform",
+    }
+    if all(column in columns for column in required_columns):
+        return
+
+    missing = [
+        column for column in required_columns if column not in columns
+    ]
+    not_null_columns = set(required_columns)
+    postgresql_timestamp_columns = {"created_at", "updated_at"}
+
+    dialect = engine.dialect.name
+    with engine.begin() as connection:
+        for column in missing:
+            column_type = required_columns[column]
+            if dialect == "postgresql" and column in postgresql_timestamp_columns:
+                column_type = "TIMESTAMP WITH TIME ZONE"
+            connection.execute(
+                text(
+                    f"ALTER TABLE incidents ADD COLUMN {column} {column_type}"
+                )
+            )
+
+        for column in required_columns:
+            if column in legacy_sources and legacy_sources[column] in columns:
+                source_column = legacy_sources[column]
+                connection.execute(
+                    text(
+                        f"UPDATE incidents SET {column} = {source_column} WHERE {column} IS NULL"
+                    )
+                )
+
+            connection.execute(
+                text(
+                    f"UPDATE incidents SET {column} = {defaults[column]} WHERE {column} IS NULL"
+                )
+            )
+
+        if dialect == "postgresql":
+            for column in not_null_columns:
+                connection.execute(
+                    text(
+                        f"ALTER TABLE incidents ALTER COLUMN {column} SET NOT NULL"
+                    )
+                )
+
+        if "tenant_id" in required_columns:
+            connection.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_incidents_tenant_id ON incidents (tenant_id)"
+                )
+            )
+        if "platform_id" in required_columns:
+            connection.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_incidents_platform_id ON incidents (platform_id)"
+                )
+            )
 
 
 def seed_if_empty(db: Session) -> None:

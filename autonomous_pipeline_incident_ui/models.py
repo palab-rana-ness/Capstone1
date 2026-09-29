@@ -207,3 +207,47 @@ class DashboardResponse(BaseModel):
     pipelines: list[Pipeline]
     summary: str
     demo: bool = False
+
+
+PipelineOutcome = Literal["PASSED", "FAILED"]
+
+
+class PipelineRunRequest(BaseModel):
+    tenant_id: str = Field(min_length=1)
+    platform_id: str = Field(min_length=1)
+    pipeline_type: str = Field(min_length=1)
+
+
+class PipelineRunStartResponse(BaseModel):
+    run_id: str = Field(min_length=1)
+    status: str = ""
+    accepted: bool = Field(default=True, strict=True)
+    tenant_id: str = ""
+    platform_id: str = ""
+    pipeline_type: str = ""
+
+
+class PipelineRunResultResponse(BaseModel):
+    run_id: str = Field(min_length=1)
+    outcome: PipelineOutcome
+    status: str = ""
+    details: str = ""
+    tenant_id: str = ""
+    platform_id: str = ""
+    pipeline_type: str = ""
+
+
+class PipelineDiagnosisRequest(BaseModel):
+    run_id: str = Field(min_length=1)
+    tenant_id: str = Field(min_length=1)
+    platform_id: str = Field(min_length=1)
+    pipeline_type: str = Field(min_length=1)
+
+
+class PipelineDiagnosisResponse(BaseModel):
+    run_id: str = Field(min_length=1)
+    diagnosis: str = Field(min_length=1)
+    details: str = ""
+    tenant_id: str = ""
+    platform_id: str = ""
+    pipeline_type: str = ""
