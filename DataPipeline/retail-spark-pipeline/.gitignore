@@ -1,0 +1,24 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Environments
+.env
+venv/
+.venv/
+
+# Spark
+metastore_db/
+spark-warehouse/
+derby.log
+
+# Logs
+*.log
+
+# Test / coverage
+.pytest_cache/
+.coverage
+
+# OS
+.DS_Store
+Thumbs.db
