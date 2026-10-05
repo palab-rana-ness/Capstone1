@@ -1,0 +1,43 @@
+I have an existing LangGraph-based autonomous incident management system with multiple agents.
+
+I want to add LangSmith observability without changing the existing agent behavior.
+
+First, inspect the current LangGraph implementation and give me an implementation plan. Do NOT modify code yet.
+
+The observability should capture:
+
+* Complete LangGraph workflow traces
+* Agent/node execution
+* LLM calls, prompts and outputs
+* Tool/API calls
+* Execution time and errors
+* Pipeline/incident workflow state
+* Token usage/cost where available
+* A unique incident/workflow ID so traces can be correlated with an incident
+
+Agents include:
+
+1. Pipeline Agent
+2. Diagnosis/RCA Agent
+3. Remediation/Planning Agent
+
+Requirements:
+
+* Use LangSmith with the existing LangGraph architecture.
+* Keep tracing configuration in environment variables.
+* Do not expose API keys in source code.
+* Do not change the business logic or agent workflow.
+* Keep observability modular so it can be enabled/disabled.
+* Make sure async execution and long-running workflows remain traceable.
+* Explain how to view and debug a complete incident workflow in LangSmith.
+
+First provide:
+
+1. Files that need to change
+2. LangSmith configuration required
+3. Tracing architecture
+4. Implementation steps
+5. How to test that traces are appearing correctly
+6. Any risks or changes needed for the existing architecture
+
+Wait for my approval before implementing.
