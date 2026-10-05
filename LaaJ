@@ -1,0 +1,78 @@
+I have an existing LangGraph autonomous incident management system with Pipeline, Diagnosis/RCA and Remediation agents.
+
+I want to add an evaluation framework using LangSmith and LLM-as-a-Judge.
+
+First, inspect the existing agent workflow and propose an implementation plan. Do NOT modify the existing production agent logic yet.
+
+The evaluation should measure:
+
+Diagnosis Agent:
+
+* RCA/root-cause correctness
+* Evidence relevance
+* Diagnosis completeness
+* Hallucination/unsupported claims
+* Confidence/reasoning quality
+
+Remediation Agent:
+
+* Fix/remediation correctness
+* Whether the proposed fix addresses the RCA
+* Safety/risk of the proposed action
+* Feasibility of the remediation plan
+
+Requirements:
+
+* Create an evaluation dataset containing representative pipeline failure scenarios.
+* Each test case should contain incident/failure information and expected diagnosis/remediation where available.
+* Run the existing LangGraph against the evaluation dataset.
+* Use an LLM-as-a-Judge to evaluate the agent outputs.
+* Return structured scores and reasoning.
+* Integrate evaluation results with LangSmith.
+* Keep evaluation separate from the production incident workflow.
+* Make the judge model configurable.
+* Do not use an agent's own output as its evaluator.
+* Make evaluation reproducible so different prompts/models/workflow versions can be compared.
+
+### Optional Evaluation Dashboard
+
+Add a separate evaluation page in the existing Reflex UI, NOT inside the normal incident-management workflow.
+
+The dashboard should display aggregated evaluation results such as:
+
+* Overall evaluation score
+* RCA correctness score
+* Evidence relevance score
+* Remediation quality score
+* Hallucination rate
+* Number of evaluation cases
+* Passed/failed evaluation cases
+* Evaluation run/version
+* Judge reasoning for an individual test case if useful
+
+The dashboard is for developers/evaluators, not normal incident operators.
+
+It should retrieve evaluation results through FastAPI rather than directly accessing LangSmith or PostgreSQL from Reflex.
+
+Do not expose LangSmith API keys or other secrets in the frontend.
+
+The production incident UI must remain unchanged.
+
+First provide:
+
+1. Evaluation architecture
+2. Dataset structure with 2–3 example cases
+3. Evaluation criteria and scoring method
+4. LLM-as-a-Judge design
+5. LangSmith integration approach
+6. Evaluation result storage/retrieval approach
+7. Evaluation dashboard design
+8. APIs required for the dashboard
+9. Files/modules that need to be created or changed
+10. Implementation steps
+11. How to compare two versions of the LangGraph
+12. How to test the complete evaluation flow
+
+Keep the implementation practical for the existing project and avoid unnecessary complexity.
+
+Do NOT implement until I approve the plan.
