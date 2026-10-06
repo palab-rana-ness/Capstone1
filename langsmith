@@ -1,0 +1,113 @@
+LANGSMITH IN THIS PROJECT — EXPLAINER
+======================================
+
+1. WHAT LANGSMITH IS
+---------------------
+LangSmith is LangChain's observability/tracing platform. It automatically
+records every step an LLM-based pipeline takes (each node, each prompt,
+each model response) as a structured "trace," viewable at langsmith.com,
+without writing manual logging code.
+
+2. WHY IT MATTERS FOR THIS PROJECT
+-----------------------------------
+The agent isn't one LLM call -- it's a 10-node LangGraph plus external tool
+calls (New Relic, Chroma) plus a second service (capstone-ui's Pipeline
+Agent) orchestrating it. LangSmith gives one clickable tree per incident
+showing every node's input/output, every LLM prompt+response, token usage,
+and latency.
+
+3. HOW IT'S WIRED IN -- AIDIAGNOSIS SIDE (zero-code auto-tracing)
+------------------------------------------------------------------
+- app/config.py defines: langsmith_tracing, langsmith_api_key,
+  langsmith_project, langsmith_endpoint.
+- app/main.py exports them as real environment variables at startup:
+
+    if settings.langsmith_tracing and settings.langsmith_api_key:
+        os.environ["LANGSMITH_TRACING"] = "true"
+        os.environ["LANGSMITH_API_KEY"] = settings.langsmith_api_key
+        os.environ["LANGSMITH_PROJECT"] = settings.langsmith_project
+        os.environ["LANGSMITH_ENDPOINT"] = settings.langsmith_endpoint
+
+- Key point: no direct LangSmith SDK calls exist inside nodes.py or
+  llm_client.py. Because `langsmith` is a transitive dependency of
+  langchain-core/langgraph, setting these env vars alone makes LangChain/
+  LangGraph auto-instrument every graph node and every ChatGroq call.
+
+4. HOW IT'S WIRED IN -- CAPSTONE-UI SIDE (manual @traceable)
+---------------------------------------------------------------
+Outside the LangGraph, auto-tracing doesn't apply, so
+app/agents/pipeline_agent.py manually decorates three async functions:
+
+    @traceable(name="pipeline_agent.start", run_type="chain")
+    @traceable(name="pipeline_agent.poll_tick", run_type="chain")
+    @traceable(name="pipeline_agent.diagnosis_and_remediation", run_type="chain")
+
+This extends the trace tree upward so one incident's trace can show:
+Pipeline Agent decision -> call to AiDiagnosis -> AiDiagnosis's 10 LangGraph
+nodes -> 2 Groq LLM calls, all as one connected tree across two services.
+
+5. CORRELATION DESIGN -- FILTERING BY ONE INCIDENT
+-----------------------------------------------------
+app/api/routes.py attaches a run_config to every graph invocation:
+
+    run_config = {
+        "run_name": f"ai-diagnosis:{trigger.incident_id}",
+        "tags": [f"tenant:{trigger.tenant_id}", f"adapter:{trigger.adapter}"],
+        "metadata": {
+            "tenant_id": ..., "incident_id": ..., "pipeline": ..., "adapter": ...
+        },
+    }
+    graph.invoke({"trigger": trigger}, config=run_config)
+
+Every trace is tagged with tenant_id, incident_id, adapter, and pipeline --
+so on langsmith.com you can filter/search by any of those and instantly
+pull up every LLM call for one specific tenant or incident.
+
+6. WHAT YOU'LL SEE ON LANGSMITH.COM
+----------------------------------------
+- Projects: "capstone-incident" (the langsmith_project setting) -- all
+  traces land under this one project.
+- Traces list: one row per graph.invoke() call, named
+  "ai-diagnosis:{incident_id}", sortable/filterable.
+- Run tree: nested tree -- whole graph run -> each of the 10 nodes
+  (validate_trigger, fetch_logs, diagnose_failure, ...) as child spans,
+  and inside diagnose_failure/generate_remediation, the actual ChatGroq
+  call as a grandchild span.
+- Inputs/Outputs per span: for diagnose_failure, the full prompt sent to
+  Groq (adapter context + similar incidents + logs) and the exact
+  structured JSON (Diagnosis) it returned.
+- Latency per span: milliseconds per node (New Relic fetch vs. LLM call
+  vs. Chroma query) -- good for spotting bottlenecks.
+- Token usage / cost: per-LLM-call token counts (prompt + completion),
+  aggregated per trace.
+- Tags/Metadata panel: tenant:tenant_002, adapter:spark, incident_id --
+  click a tag to filter the whole dashboard to just that tenant's history.
+- Errors: any node that raises (e.g. validate_incident's ValueError for
+  missing error_message) shows as a failed run with the exception + stack
+  trace.
+
+7. SUGGESTED LIVE-DEMO SCRIPT
+----------------------------------
+1. Trigger a real diagnosis (fail a pipeline for tenant_002).
+2. Open langsmith.com -> capstone-incident project -> find the trace named
+   ai-diagnosis:<incident_id>.
+3. Expand the tree -- point to each of the 10 node spans in order, matching
+   them to workflow.py's graph shape.
+4. Click into the diagnose_failure span -> show the actual prompt text next
+   to the structured Diagnosis JSON output -- "this is the evidence it was
+   grounded in, not a hallucination."
+5. Click into generate_remediation -> show the proposed actions, then point
+   out that validate_remediation is a separate, non-LLM span right after it
+   -- proving the guardrail step.
+6. Filter the whole project by tag:tenant:tenant_002 to show multi-tenant
+   trace isolation.
+
+8. KNOWN CAVEAT (be upfront about this)
+--------------------------------------------
+Per PRESENTATION_CONTENT.md: integration is fully wired and correct, but at
+time of writing there's an unresolved 403 Forbidden on trace ingestion (an
+API key/workspace permission issue on the LangSmith account side, confirmed
+via a direct probe script -- not a code/config bug). Also, @traceable
+hasn't been wrapped around the non-LangChain tool calls yet (New Relic
+fetch, raw Chroma calls) -- only LangChain/LangGraph-native steps and the
+three pipeline_agent.py functions are traced today.
